@@ -43,6 +43,14 @@ namespace Inventario_Listas_Enlazadas
             set { _siguiente = value; }
         }
 
+        private Producto _anterior;
+
+        internal Producto Anterior
+        {
+            get { return _anterior; }
+            set { _anterior = value; }
+        }
+
         public Producto(int clave, string nombre)
         {
             _nombre = nombre;

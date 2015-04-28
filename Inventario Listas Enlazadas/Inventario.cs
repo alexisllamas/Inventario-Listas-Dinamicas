@@ -9,27 +9,41 @@ namespace Inventario_Listas_Enlazadas
     class Inventario
     {
         private Producto _inicio;
-
-        internal Producto Inicio
-        {
-            get { return _inicio; }
-            set { _inicio = value; }
-        }
+        private Producto _ultimo;
 
         public void agregar(Producto nuevo)
         {
             if (_inicio == null)
+            {
                 _inicio = nuevo;
+                _ultimo = nuevo;
+            }
             else
                 agregar(_inicio, nuevo);
         }
 
-        private void agregar(Producto pUltimo, Producto nuevo)
+        private void agregar(Producto viejo, Producto nuevo)
         {
-            if (pUltimo.Siguiente == null)
-                pUltimo.Siguiente = nuevo;
+            if (nuevo.Clave < viejo.Clave)
+            {
+                nuevo.Siguiente = viejo;
+                nuevo.Anterior = viejo.Anterior;
+
+                if (viejo.Anterior == null)
+                    _inicio = nuevo;
+                else
+                    viejo.Anterior.Siguiente = nuevo;
+
+                viejo.Anterior = nuevo;
+            }
+            else if (viejo.Siguiente == null)
+            {
+                nuevo.Anterior = viejo;
+                _ultimo = nuevo;
+                viejo.Siguiente = nuevo;
+            }
             else
-                agregar(pUltimo.Siguiente, nuevo);
+                agregar(viejo.Siguiente, nuevo);
         }
 
         public void eliminar(int clave)
@@ -37,93 +51,63 @@ namespace Inventario_Listas_Enlazadas
             Producto t = buscar(clave);
             if (t == null)
                 return;
-            else if (_inicio == t)
-            {
-                if (_inicio.Siguiente == null)
-                    _inicio = null;
-                else
-                    _inicio = _inicio.Siguiente;
-            }
-            else
-                eliminar(_inicio, t);
-        }
 
-        private void eliminar(Producto nuevo, Producto t)
-        {
-            if (nuevo.Siguiente == t)
-            {
-                if (nuevo.Siguiente.Siguiente == null)
-                    nuevo.Siguiente = null;
-                else
-                    nuevo.Siguiente = nuevo.Siguiente.Siguiente;
-            }
+            if (t == _inicio)
+                _inicio = t.Siguiente;
             else
-                eliminar(nuevo.Siguiente, t);
- 
+                t.Anterior.Siguiente = t.Siguiente;
+
+            if (t == _ultimo)
+                _ultimo = t.Anterior;
+            else
+                t.Siguiente.Anterior = t.Anterior;
         }
 
         public void modificar(Producto nuevo)
         {
-            if (_inicio == null)
-                return;
-            else if (_inicio.Clave == nuevo.Clave)
+            Producto tem = buscar(nuevo.Clave);
+            if (tem != null)
             {
-                nuevo.Siguiente = _inicio.Siguiente;
-                _inicio = nuevo;
-            }
-            else
-                modificar(_inicio, nuevo);
-        }
+                if (tem.Anterior != null)
+                {
+                    tem.Anterior.Siguiente = nuevo;
+                    nuevo.Anterior = tem.Anterior;
+                }
+                else
+                    _inicio = nuevo;
 
-        private void modificar(Producto viejo, Producto nuevo)
-        {
-            if (viejo.Siguiente == null)
-                return;
-            else if (viejo.Siguiente.Clave == nuevo.Clave)
-            {
-                nuevo.Siguiente = viejo.Siguiente.Siguiente;
-                viejo.Siguiente = nuevo;
+                if (tem.Siguiente != null)
+                {
+                    tem.Siguiente.Anterior = nuevo;
+                    nuevo.Siguiente = tem.Siguiente;
+                }
+                else
+                    _ultimo = nuevo;
             }
-            else
-                modificar(viejo.Siguiente, nuevo);
         }
 
         public Producto buscar(int clave)
         {
-            if (_inicio == null)
-                return null;
-            else if (_inicio.Clave == clave)
-                return _inicio;
-            else
-                return buscar(_inicio.Siguiente, clave);
-        }
-
-        public Producto buscar(Producto pUltimo, int clave)
-        {
-            if (pUltimo == null)
-                return null;
-            else if (pUltimo.Clave == clave)
-                return pUltimo;
-            else
-                return buscar(pUltimo.Siguiente, clave);
+            Producto tem = _inicio;
+            while(tem != null)
+            {
+                if (tem.Clave == clave)
+                    return tem;
+                tem = tem.Siguiente;
+            }
+            return null;
         }
 
         public string reporte()
         {
-            if (_inicio == null)
-                return "";
-            else if (_inicio.Siguiente == null)
-                return _inicio.ToString();
-            else
-                return _inicio.ToString() + Environment.NewLine + reporte(_inicio.Siguiente);
-        }
-
-        private string reporte(Producto hola)
-        {
-            if (hola.Siguiente == null)
-                return hola.ToString();
-            else
-                return hola.ToString() + Environment.NewLine + reporte(hola.Siguiente);
+            Producto tem = _ultimo;
+            string cadenita = "";
+            while(tem != null)
+            {
+                cadenita += tem.ToString() + Environment.NewLine;
+                tem = tem.Anterior;
+            }
+            return cadenita;
         }
     }
 }
